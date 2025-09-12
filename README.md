@@ -35,6 +35,23 @@ Open the URL shown in your terminal. Click “Download PDF” on a vehicle to ge
 4) The workflow at `.github/workflows/daily-scrape.yml` runs daily around 7:00 AM Mountain Time and commits `public/data/inventory.csv` if it changed; it then triggers the Vercel deploy hook
 
 DST handling: the workflow schedules both 13:00 and 14:00 UTC to cover 7:00 AM in MDT/MST.
+## On-demand refresh (button)
+
+You can trigger a new scrape on demand (no waiting for the schedule):
+
+1) Configure environment variables
+
+- In Vercel Project Settings → Environment Variables, set:
+	- `GITHUB_TOKEN` (Required): A PAT with repo access to dispatch workflows
+	- `ACTION_TRIGGER_SECRET` (Recommended): Shared secret required by the endpoint
+	- `GH_OWNER` (Optional): Defaults to `smitster1403`
+	- `GH_REPO` (Optional): Defaults to `red-deer-toyota`
+	- `GH_WORKFLOW_FILE` (Optional): Defaults to `.github/workflows/daily-scrape.yml`
+- In the React app (optional), set `REACT_APP_ACTION_SECRET` to the same secret so the request includes `x-action-secret`.
+
+2) Click the "Refresh Inventory" button on the site. This calls `/api/trigger-scrape`, which dispatches the GitHub Actions workflow. The workflow runs the scraper, commits updated CSV if changed, and optionally hits your Vercel Deploy Hook to update the site.
+
+Security note: If you don't configure `ACTION_TRIGGER_SECRET`, the endpoint allows open calls. For production, set the secret in Vercel and the `REACT_APP_ACTION_SECRET` so only your button can call it.
 
 ## Files of interest
 
