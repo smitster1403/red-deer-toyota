@@ -1,21 +1,26 @@
 import json
 import os
 import sys
+import traceback
 from typing import Any
 
-# Ensure Python can import from src/script
-ROOT = os.getcwd()
-SCRIPT_DIR = os.path.join(ROOT, 'src', 'script')
-if SCRIPT_DIR not in sys.path:
-    sys.path.append(SCRIPT_DIR)
+# Resolve project root robustly (works in Vercel packaged FS)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CANDIDATES = [
+    os.path.normpath(os.path.join(BASE_DIR, '..', 'src', 'script')),
+    os.path.normpath(os.path.join(BASE_DIR, '..', '..', 'src', 'script')),
+    os.path.normpath(os.path.join(os.getcwd(), 'src', 'script')),
+]
+for p in CANDIDATES:
+    if os.path.isdir(p) and p not in sys.path:
+        sys.path.append(p)
 
+IMPORT_ERROR = None
+UniversalRedDeerToyotaScraper = None
 try:
-    from toyota_scrapper import UniversalRedDeerToyotaScraper
+    from toyota_scrapper import UniversalRedDeerToyotaScraper  # type: ignore
 except Exception as e:
-    UniversalRedDeerToyotaScraper = None
     IMPORT_ERROR = e
-else:
-    IMPORT_ERROR = None
 
 
 def _json_response(status: int, body: Any):
@@ -40,7 +45,13 @@ def handler(request, response=None):
         return _json_response(405, {"error": "Method Not Allowed"})
 
     if IMPORT_ERROR or UniversalRedDeerToyotaScraper is None:
-        return _json_response(500, {"error": "Scraper import failed", "details": str(IMPORT_ERROR)})
+        return _json_response(500, {
+            "error": "Scraper import failed",
+            "details": str(IMPORT_ERROR) if IMPORT_ERROR else "Unknown import error",
+            "search_paths": [p for p in CANDIDATES],
+            "cwd": os.getcwd(),
+            "base": BASE_DIR,
+        })
 
     try:
         scraper = UniversalRedDeerToyotaScraper()
@@ -52,4 +63,4 @@ def handler(request, response=None):
             "vehicles": vehicles or [],
         })
     except Exception as e:
-        return _json_response(500, {"error": str(e)})
+        return _json_response(500, {"error": str(e), "trace": traceback.format_exc()})
