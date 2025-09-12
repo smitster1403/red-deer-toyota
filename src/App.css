@@ -54,74 +54,86 @@ h1 {
 
 /* Poster styles (A4-ish aspect ratio) */
 .poster {
-  width: 750px; /* Display size, will be rasterized at 2x for PDF */
-  aspect-ratio: 1/1.414; /* A4 portrait ratio */
-  border: 2px solid #111827;
-  border-radius: 8px;
-  padding: 18px;
-  background: #ffffff;
+  width: 800px; /* Display size, rendered at 2x in PDF */
+  aspect-ratio: 1/1.414; /* A4 portrait */
+  border: 3px solid #0f172a;
+  border-radius: 10px;
+  padding: 24px 28px;
+  background: #fff;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
-.poster-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  border-bottom: 2px solid #111827;
+.poster-title-block {
+  border-bottom: 3px solid #0f172a;
   padding-bottom: 12px;
 }
 
-.poster-title {
+.poster-title-line {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  gap: 12px;
   align-items: baseline;
 }
 
 .poster-year {
-  font-size: 36px;
-  font-weight: 800;
+  font-size: 56px;
+  font-weight: 900;
 }
 
 .poster-make {
-  font-size: 28px;
-  font-weight: 700;
-}
-
-.poster-model {
-  font-size: 28px;
-  font-weight: 700;
-}
-
-.poster-price {
-  font-size: 32px;
+  font-size: 44px;
   font-weight: 800;
-  color: #065f46;
 }
 
-.poster-body {
-  padding-top: 14px;
+.poster-model-large {
+  margin-top: 4px;
+  font-size: 52px;
+  font-weight: 900;
 }
 
-.poster-specs {
+.poster-price-center {
+  text-align: center;
+  font-size: 96px;
+  line-height: 1.0;
+  font-weight: 900;
+  color: #064e3b;
+  margin: 8px 0 4px 0;
+}
+
+.poster-specs-wide {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 14px;
+  flex: 1 1 auto;
 }
 
-.poster-specs > div {
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 10px;
+.spec {
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px 14px;
+  min-height: 84px;
+}
+
+.spec label {
+  display: block;
+  font-size: 18px;
+  color: #475569;
+  margin-bottom: 6px;
+}
+
+.spec span {
+  font-size: 28px;
+  font-weight: 700;
 }
 
 .poster-footer {
   text-align: center;
-  padding-top: 6px;
-  border-top: 1px dashed #d1d5db;
-  color: #6b7280;
-  font-size: 14px;
+  padding-top: 8px;
+  border-top: 2px dashed #cbd5e1;
+  color: #64748b;
+  font-size: 16px;
 }
 
 .App-header {

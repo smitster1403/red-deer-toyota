@@ -28,24 +28,24 @@ const Poster = ({ vehicle }) => {
   return (
     <div className="poster-wrapper">
       <div className="poster" ref={ref}>
-        <div className="poster-header">
-          <div className="poster-title">
+        <div className="poster-title-block">
+          <div className="poster-title-line">
             <span className="poster-year">{vehicle.year}</span>
             <span className="poster-make">{vehicle.makeName}</span>
-            <span className="poster-model">{vehicle.model}</span>
           </div>
-          <div className="poster-price">{vehicle.value ? `$${Number(String(vehicle.value).replace(/[^0-9]/g, '')).toLocaleString()}` : '—'}</div>
+          <div className="poster-model-large">{vehicle.model}</div>
         </div>
-        <div className="poster-body">
-          <div className="poster-specs">
-            <div><strong>Trim</strong><div>{vehicle.trim || '—'}</div></div>
-            <div><strong>Sub-Model</strong><div>{vehicle['sub-model'] || '—'}</div></div>
-            <div><strong>Mileage</strong><div>{vehicle.mileage ? `${Number(String(vehicle.mileage).replace(/[^0-9]/g, '')).toLocaleString()} km` : '—'}</div></div>
-            <div><strong>Engine</strong><div>{vehicle.engine || '—'}</div></div>
-            <div><strong>Stock #</strong><div>{vehicle.stock_number || '—'}</div></div>
-          </div>
-          <div className="poster-footer">Red Deer Toyota · Used Inventory · reddeertoyota.com</div>
+        <div className="poster-price-center">
+          {vehicle.value ? `$${Number(String(vehicle.value).replace(/[^0-9]/g, '')).toLocaleString()}` : '—'}
         </div>
+        <div className="poster-specs-wide">
+          <div className="spec"><label>Trim</label><span>{vehicle.trim || '—'}</span></div>
+          <div className="spec"><label>Sub-Model</label><span>{vehicle['sub-model'] || '—'}</span></div>
+          <div className="spec"><label>Mileage</label><span>{vehicle.mileage ? `${Number(String(vehicle.mileage).replace(/[^0-9]/g, '')).toLocaleString()} km` : '—'}</span></div>
+          <div className="spec"><label>Engine</label><span>{vehicle.engine || '—'}</span></div>
+          <div className="spec"><label>Stock #</label><span>{vehicle.stock_number || '—'}</span></div>
+        </div>
+        <div className="poster-footer">Red Deer Toyota · Used Inventory · reddeertoyota.com</div>
       </div>
       <button className="btn" onClick={handleDownloadPdf}>Download PDF</button>
     </div>
