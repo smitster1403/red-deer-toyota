@@ -48,7 +48,7 @@ const VehicleList = () => {
       <div className="grid">
         {vehicles.map((v, i) => (
           <div className="card" key={`${v.stock_number || v.model || i}-${i}`}>
-            <Poster vehicle={v} />
+            <Poster vehicle={v} compact />
           </div>
         ))}
       </div>

@@ -3,13 +3,15 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
 // A4 portrait 210mm x 297mm -> convert to px at 96 DPI ~ 794 x 1123, we use higher scale for clarity
-const Poster = ({ vehicle }) => {
-  const ref = useRef(null);
+const Poster = ({ vehicle, compact = false }) => {
+  const ref = useRef(null); // used when not compact
+  const fullRef = useRef(null); // hidden full poster for PDF in compact mode
   const [templateAvailable, setTemplateAvailable] = useState(false);
 
   const handleDownloadPdf = async () => {
-    if (!ref.current) return;
-    const canvas = await html2canvas(ref.current, { scale: 2, backgroundColor: '#ffffff' });
+    const node = compact ? fullRef.current : ref.current;
+    if (!node) return;
+    const canvas = await html2canvas(node, { scale: 2, backgroundColor: '#ffffff' });
     const imgData = canvas.toDataURL('image/png');
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
     const pageWidth = pdf.internal.pageSize.getWidth();
@@ -84,6 +86,41 @@ const Poster = ({ vehicle }) => {
     </>
   );
 
+  if (compact) {
+    // Compact preview card + hidden full poster for PDF capture
+    return (
+      <div className="preview-card">
+        <div className="preview-title">{[vehicle.year, vehicle.makeName, vehicle.model].filter(Boolean).join(' ')}</div>
+        <div className="preview-meta">
+          <div>Stock: <strong>{vehicle.stock_number || '—'}</strong></div>
+          <div>Odometer: <strong>{vehicle.mileage ? `${Number(String(vehicle.mileage).replace(/[^0-9]/g, '')).toLocaleString()} km` : '—'}</strong></div>
+        </div>
+        <div className="preview-price">{vehicle.value ? `$${Number(String(vehicle.value).replace(/[^0-9]/g, '')).toLocaleString()}` : '—'}</div>
+        <button className="btn" onClick={handleDownloadPdf}>Download PDF</button>
+
+        {/* Hidden full poster for PDF capture */}
+        <div style={{ position: 'absolute', left: -99999, top: 0 }}>
+          <div className={`poster poster--pdf${templateAvailable ? ' template' : ''}`} ref={fullRef}>
+            {templateAvailable ? contentTemplate : (
+              <>
+                <img
+                  className="poster-template-preload"
+                  src={`${process.env.PUBLIC_URL || ''}/templates/T63471.png`}
+                  alt="Template preload"
+                  onLoad={() => setTemplateAvailable(true)}
+                  onError={() => setTemplateAvailable(false)}
+                  style={{ display: 'none' }}
+                />
+                {contentClassic}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Full poster visible (non-compact)
   return (
     <div className="poster-wrapper">
       <div className={`poster${templateAvailable ? ' template' : ''}`} ref={ref}>

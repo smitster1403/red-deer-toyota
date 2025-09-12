@@ -28,8 +28,8 @@
   text-align: center;
   font-weight: 900;
 }
-.price-label { font-size: 62px; margin-right: 12px; }
-.price-value { font-size: 88px; }
+.price-label { font-size: 80px; margin-right: 14px; }
+.price-value { font-size: 114px; }
 
 .poster-disclaimer {
   margin-top: 8px;
@@ -61,9 +61,8 @@ h1 {
 
 .grid {
   display: grid;
-  /* Ensure each poster has enough width to avoid overlap */
-  grid-template-columns: repeat(auto-fill, minmax(900px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
 }
 
 .card {
@@ -135,7 +134,7 @@ h1 {
 .fld { position: absolute; color: #111827; }
 .fld-logo { left: 28px; top: 28px; }
 .fld-stock { right: 32px; top: 38px; font-size: 33px; font-weight: 900; }
-.fld-price { left: 0; right: 0; top: 220px; text-align: center; font-size: 120px; font-weight: 900; color: #b91c1c; }
+.fld-price { left: 0; right: 0; top: 220px; text-align: center; font-size: 156px; font-weight: 900; color: #b91c1c; }
 .fld-year-make { left: 40px; top: 380px; font-size: 70px; font-weight: 900; }
 .fld-model { left: 40px; top: 450px; font-size: 78px; font-weight: 900; }
 .fld-trim-sub { left: 40px; top: 520px; font-size: 32px; font-weight: 800; color: #374151; }
@@ -211,6 +210,20 @@ h1 {
 .spec label { display: block; font-size: 20px; color: #334155; margin-bottom: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
 
 .spec span { font-size: 36px; font-weight: 800; }
+
+/* Compact preview card styles */
+.preview-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+}
+.preview-title { font-size: 22px; font-weight: 800; }
+.preview-meta { font-size: 14px; color: #475569; display: flex; gap: 16px; flex-wrap: wrap; }
+.preview-price { font-size: 22px; font-weight: 900; }
 
 /* Responsive: ensure single column and no overlap on smaller screens */
 @media (max-width: 1200px) {
