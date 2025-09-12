@@ -3,7 +3,7 @@ name: Scheduled inventory scrape (MT every other hour)
 on:
   schedule:
     # Run hourly in UTC, then gate by local MT window inside the job
-    - cron: '0 * * * *'
+    - cron: '1 8-18 * * Mon-Sat'
   workflow_dispatch: {}
 
 jobs:
