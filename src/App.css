@@ -1,16 +1,127 @@
-.App {
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  color: #0c111d;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 32px auto;
+  padding: 0 16px;
+}
+
+h1 {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+}
+
+.hint {
+  color: #475569;
+  margin-bottom: 20px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.poster-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #111827;
+  background: #111827;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn:hover { opacity: 0.95; }
+
+/* Poster styles (A4-ish aspect ratio) */
+.poster {
+  width: 750px; /* Display size, will be rasterized at 2x for PDF */
+  aspect-ratio: 1/1.414; /* A4 portrait ratio */
+  border: 2px solid #111827;
+  border-radius: 8px;
+  padding: 18px;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.poster-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 2px solid #111827;
+  padding-bottom: 12px;
+}
+
+.poster-title {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.poster-year {
+  font-size: 36px;
+  font-weight: 800;
+}
+
+.poster-make {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.poster-model {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.poster-price {
+  font-size: 32px;
+  font-weight: 800;
+  color: #065f46;
+}
+
+.poster-body {
+  padding-top: 14px;
+}
+
+.poster-specs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.poster-specs > div {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.poster-footer {
   text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+  padding-top: 6px;
+  border-top: 1px dashed #d1d5db;
+  color: #6b7280;
+  font-size: 14px;
 }
 
 .App-header {
