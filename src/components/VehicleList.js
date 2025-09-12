@@ -28,6 +28,7 @@ const VehicleList = () => {
           trim: row.trim || row.Trim || '',
           mileage: row.mileage || row.Mileage || '',
           value: row.value || row.Price || row.price || '',
+          sale_value: row.sale_value || row.Sale || row.SalePrice || row.salePrice || '',
           stock_number: row.stock_number || row.Stock || row.StockNumber || '',
           engine: row.engine || row.Engine || '',
         }));

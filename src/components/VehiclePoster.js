@@ -14,8 +14,7 @@ const Poster = ({ vehicle, compact = false }) => {
     const canvas = await html2canvas(node, { scale: 2, backgroundColor: '#ffffff' });
     const imgData = canvas.toDataURL('image/png');
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
+  const pageWidth = pdf.internal.pageSize.getWidth();
     // Fit image to full page width; with A4-matching aspect ratio this fills the page height
     const imgWidth = pageWidth;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
@@ -26,6 +25,14 @@ const Poster = ({ vehicle, compact = false }) => {
       .toLowerCase();
     pdf.save(`${name || 'poster'}.pdf`);
   };
+
+  const formatCurrency = (v) => (v ? `$${Number(String(v).replace(/[^0-9]/g, '')).toLocaleString()}` : '');
+  const price = formatCurrency(vehicle.value);
+  const sale = formatCurrency(vehicle.sale_value);
+
+  const hasSale = !!(vehicle.sale_value && String(vehicle.sale_value).replace(/[^0-9]/g, '')) && (
+    !vehicle.value || Number(String(vehicle.sale_value).replace(/[^0-9]/g, '')) < Number(String(vehicle.value).replace(/[^0-9]/g, ''))
+  );
 
   const contentClassic = (
     <>
@@ -50,10 +57,22 @@ const Poster = ({ vehicle, compact = false }) => {
         <div className="info-line"><span className="info-label">Engine:</span> <span className="info-value">{vehicle.engine || '—'}</span></div>
       </div>
 
-      {/* Price line */}
+      {/* Price block with labels, and optional NEW PRICE when on sale */}
       <div className="poster-price-line">
-        <span className="price-label">Price:</span>
-        <span className="price-value">{vehicle.value ? `$${Number(String(vehicle.value).replace(/[^0-9]/g, '')).toLocaleString()}` : '—'}</span>
+        {!hasSale && (
+          <div className="price-block">
+            <div className="price-label-line">PRICE:</div>
+            <div className="price-main">{price || '—'}</div>
+          </div>
+        )}
+        {hasSale && (
+          <div className="price-block">
+            <div className="price-label-line">PRICE:</div>
+            <div className="price-old">{price}</div>
+            <div className="price-new-label">NEW PRICE</div>
+            <div className="price-now">{sale}</div>
+          </div>
+        )}
       </div>
 
       {/* Disclaimer */}
@@ -76,7 +95,20 @@ const Poster = ({ vehicle, compact = false }) => {
           <img className="brand-logo" src={`${process.env.PUBLIC_URL || ''}/red-deer-logo.png`} alt="Logo" />
         </div>
         <div className="fld fld-stock">{vehicle.stock_number || ''}</div>
-        <div className="fld fld-price">{vehicle.value ? `$${Number(String(vehicle.value).replace(/[^0-9]/g, '')).toLocaleString()}` : ''}</div>
+        {!hasSale && (
+          <>
+            <div className="fld fld-price-label">PRICE:</div>
+            <div className="fld fld-price">{price}</div>
+          </>
+        )}
+        {hasSale && (
+          <>
+            <div className="fld fld-price-label">PRICE:</div>
+            <div className="fld fld-price-old">{price}</div>
+            <div className="fld fld-new-price-label">NEW PRICE</div>
+            <div className="fld fld-price-new">{sale}</div>
+          </>
+        )}
   <div className="fld fld-year-make">{vehicle.makeName || ''}</div>
   <div className="fld fld-model">{`${vehicle.year ? vehicle.year + ' ' : ''}${vehicle.model || ''}`}</div>
         <div className="fld fld-trim-sub">{[vehicle.trim, vehicle['sub-model']].filter(Boolean).join(' · ')}</div>
@@ -95,7 +127,15 @@ const Poster = ({ vehicle, compact = false }) => {
           <div>Stock: <strong>{vehicle.stock_number || '—'}</strong></div>
           <div>Odometer: <strong>{vehicle.mileage ? `${Number(String(vehicle.mileage).replace(/[^0-9]/g, '')).toLocaleString()} km` : '—'}</strong></div>
         </div>
-        <div className="preview-price">{vehicle.value ? `$${Number(String(vehicle.value).replace(/[^0-9]/g, '')).toLocaleString()}` : '—'}</div>
+        <div className="preview-price">
+          {!hasSale && (price || '—')}
+          {hasSale && (
+            <>
+              <span className="preview-old">{price}</span>
+              <span className="preview-now">{sale}</span>
+            </>
+          )}
+        </div>
         <button className="btn" onClick={handleDownloadPdf}>Download PDF</button>
 
         {/* Hidden full poster for PDF capture */}

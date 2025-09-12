@@ -215,6 +215,7 @@ class UniversalRedDeerToyotaScraper:
             'trim': '',
             'mileage': '',
             'value': '',
+            'sale_value': '',
             'stock_number': '',
             'engine': ''
         }
@@ -398,26 +399,63 @@ class UniversalRedDeerToyotaScraper:
                     vehicle['sub-model'] = trim_name  # Use same value for both
                     break
             
-            # Extract price - be more specific about format
-            price_patterns = [
-                r'\$([0-9]{2}[0-9,]*)',  # $XX,XXX format
-                r'Price[:\s]*\$([0-9,]+)',
-                r'MSRP[:\s]*\$([0-9,]+)',
-                r'Starting at[:\s]*\$([0-9,]+)'
+            # Extract price and potential sale price with robust patterns
+            orig_price = None
+            sale_price = None
+
+            # Common paired patterns e.g. "Was $X Now $Y"
+            paired_patterns = [
+                r"Was[:\s]*\$([0-9,]+)\s*(?:Now|Sale Price)[:\s]*\$([0-9,]+)",
+                r"List Price[:\s]*\$([0-9,]+)\s*(?:Now|Sale Price)[:\s]*\$([0-9,]+)",
+                r"Retail Price[:\s]*\$([0-9,]+)\s*(?:Now|Sale Price)[:\s]*\$([0-9,]+)",
             ]
-            
-            for pattern in price_patterns:
-                price_match = re.search(pattern, element_text)
-                if price_match:
-                    price_value = price_match.group(1).replace(',', '')
-                    # Validate price is reasonable (between $3,000 and $300,000 for used cars)
-                    try:
-                        price_int = int(price_value)
-                        if 3000 <= price_int <= 300000:
-                            vehicle['value'] = price_value
-                            break
-                    except ValueError:
-                        continue
+            for pattern in paired_patterns:
+                m = re.search(pattern, element_text, re.IGNORECASE)
+                if m:
+                    p1 = int(m.group(1).replace(',', ''))
+                    p2 = int(m.group(2).replace(',', ''))
+                    hi, lo = (p1, p2) if p1 >= p2 else (p2, p1)
+                    orig_price, sale_price = hi, lo
+                    break
+
+            if orig_price is None and sale_price is None:
+                # Independent patterns
+                sale_patterns = [
+                    r"(?:Sale\s*Price|Now|Internet\s*Price|Special|Clearance)[:\s]*\$([0-9,]+)",
+                ]
+                orig_patterns = [
+                    r"(?:Price|MSRP|List\s*Price|Retail\s*Price|Was)[:\s]*\$([0-9,]+)",
+                    r"\$([0-9]{2}[0-9,]*)",
+                ]
+                for pattern in sale_patterns:
+                    m = re.search(pattern, element_text, re.IGNORECASE)
+                    if m:
+                        try:
+                            sp = int(m.group(1).replace(',', ''))
+                            if 3000 <= sp <= 300000:
+                                sale_price = sp
+                                break
+                        except Exception:
+                            pass
+                for pattern in orig_patterns:
+                    m = re.search(pattern, element_text, re.IGNORECASE)
+                    if m:
+                        try:
+                            op = int(m.group(1).replace(',', ''))
+                            if 3000 <= op <= 300000:
+                                if sale_price is None or op != sale_price:
+                                    orig_price = op
+                                    break
+                        except Exception:
+                            pass
+
+            # Assign into vehicle dict
+            if sale_price is not None and (orig_price is None or sale_price < orig_price):
+                if orig_price is not None:
+                    vehicle['value'] = str(orig_price)
+                vehicle['sale_value'] = str(sale_price)
+            elif orig_price is not None:
+                vehicle['value'] = str(orig_price)
             
             # Extract mileage - more accurate patterns including miles and km
             mileage_patterns = [
@@ -505,10 +543,17 @@ class UniversalRedDeerToyotaScraper:
                         vehicle['makeName'] = str(value).title()
                     elif 'model' in attr_lower and not vehicle['model']:
                         vehicle['model'] = str(value)
-                    elif 'price' in attr_lower and not vehicle['value']:
+                    elif 'sale' in attr_lower and not vehicle['sale_value']:
+                        sale_clean = re.sub(r'[^\d]', '', str(value))
+                        if sale_clean and sale_clean.isdigit() and 3000 <= int(sale_clean) <= 300000:
+                            vehicle['sale_value'] = sale_clean
+                    elif 'price' in attr_lower:
                         price_clean = re.sub(r'[^\d]', '', str(value))
-                        if price_clean and 3000 <= int(price_clean) <= 300000:
-                            vehicle['value'] = price_clean
+                        if price_clean and price_clean.isdigit() and 3000 <= int(price_clean) <= 300000:
+                            if vehicle['sale_value'] and int(price_clean) < int(vehicle['sale_value']):
+                                vehicle['value'], vehicle['sale_value'] = vehicle['sale_value'], price_clean
+                            elif not vehicle['value']:
+                                vehicle['value'] = price_clean
                     elif 'stock' in attr_lower and not vehicle['stock_number']:
                         if len(str(value)) >= 3:
                             vehicle['stock_number'] = str(value)
@@ -664,7 +709,7 @@ class UniversalRedDeerToyotaScraper:
 
     def save_to_csv(self, filename):
         """Save only if we have real vehicle data - accepts full path"""
-        fieldnames = ['makeName', 'year', 'model', 'sub-model', 'trim', 'mileage', 'value', 'stock_number', 'engine']
+        fieldnames = ['makeName', 'year', 'model', 'sub-model', 'trim', 'mileage', 'value', 'sale_value', 'stock_number', 'engine']
         
         if not self.vehicles:
             logger.info("No vehicles found - NOT creating CSV file")
@@ -719,9 +764,9 @@ class UniversalRedDeerToyotaScraper:
             print("  {}: {} vehicles".format(brand, count))
         
         # Print header using .format() to avoid any string issues
-        print("\n{:<12} {:<6} {:<15} {:<12} {:<10} {:<10} {:<10} {:<10} {:<20}".format(
-            'Make', 'Year', 'Model', 'Sub-Model', 'Trim', 'Mileage', 'Value', 'Stock#', 'Engine'))
-        print("-" * 110)
+        print("\n{:<12} {:<6} {:<15} {:<12} {:<10} {:<10} {:<10} {:<10} {:<10} {:<20}".format(
+            'Make', 'Year', 'Model', 'Sub-Model', 'Trim', 'Mileage', 'Value', 'Sale', 'Stock#', 'Engine'))
+        print("-" * 125)
         
         # Print each vehicle
         for vehicle in self.vehicles:
@@ -732,11 +777,12 @@ class UniversalRedDeerToyotaScraper:
             trim = vehicle.get('trim', '')[:9]
             mileage = vehicle.get('mileage', '')[:9]
             value = vehicle.get('value', '')[:9]
+            sale_value = vehicle.get('sale_value', '')[:9]
             stock = vehicle.get('stock_number', '')[:9]
             engine = vehicle.get('engine', '')[:19]
             
-            print("{:<12} {:<6} {:<15} {:<12} {:<10} {:<10} {:<10} {:<10} {:<20}".format(
-                make, year, model, submodel, trim, mileage, value, stock, engine))
+            print("{:<12} {:<6} {:<15} {:<12} {:<10} {:<10} {:<10} {:<10} {:<10} {:<20}".format(
+                make, year, model, submodel, trim, mileage, value, sale_value, stock, engine))
 
 def main():
     """Main execution - no fallback data"""
