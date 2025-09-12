@@ -42,8 +42,8 @@
   background: #ef4444;
   transform: rotate(-6deg);
 }
-.price-new-label { font-size: 28px; letter-spacing: 0.08em; font-weight: 900; color: #991b1b; }
-.price-now { font-size: 150px; color: #b91c1c; line-height: 0.95; }
+.price-new-label { font-size: 34px; letter-spacing: 0.08em; font-weight: 900; color: #991b1b; }
+.price-now { font-size: 180px; color: #b91c1c; line-height: 0.95; }
 
 .poster-disclaimer {
   margin-top: 8px;
@@ -152,8 +152,8 @@ h1 {
 .fld-price { left: 0; right: 0; top: 210px; text-align: center; font-size: 156px; font-weight: 900; color: #b91c1c; }
 .fld-price-old { left: 0; right: 0; top: 200px; text-align: center; font-size: 100px; font-weight: 900; color: #6b7280; position: relative; }
 .fld-price-old::after { content: ""; position: absolute; left: 35%; right: 35%; top: 50%; height: 6px; background: #ef4444; transform: rotate(-8deg); }
-.fld-new-price-label { left: 0; right: 0; top: 245px; text-align: center; font-size: 34px; font-weight: 900; letter-spacing: 0.08em; color: #991b1b; }
-.fld-price-new { left: 0; right: 0; top: 290px; text-align: center; font-size: 180px; font-weight: 900; color: #b91c1c; }
+.fld-new-price-label { left: 0; right: 0; top: 245px; text-align: center; font-size: 68px; font-weight: 900; letter-spacing: 0.08em; color: #991b1b; }
+.fld-price-new { left: 0; right: 0; top: 290px; text-align: center; font-size: 216px; font-weight: 900; color: #b91c1c; }
 .fld-year-make { left: 40px; top: 380px; font-size: 70px; font-weight: 900; }
 .fld-model { left: 40px; top: 450px; font-size: 78px; font-weight: 900; }
 .fld-trim-sub { left: 40px; top: 520px; font-size: 32px; font-weight: 800; color: #374151; }
