@@ -1,10 +1,9 @@
-name: Daily inventory scrape
+name: Scheduled inventory scrape (MT every other hour)
 
 on:
   schedule:
-    # 7:00 AM MT is 13:00 UTC during MDT and 14:00 UTC during MST
-    - cron: '0 13 * * *'
-    - cron: '0 14 * * *'
+    # Run hourly in UTC, then gate by local MT window inside the job
+    - cron: '0 * * * *'
   workflow_dispatch: {}
 
 jobs:
@@ -14,20 +13,48 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Evaluate MT schedule window (Mon–Sat, 7am–8pm, every other hour)
+        id: schedule_check
+        shell: bash
+        run: |
+          export TZ=America/Edmonton
+          DAY=$(date +%u)      # 1=Mon .. 7=Sun
+          HOUR=$(date +%H)     # 00..23 in local MT
+          echo "Local MT now: $(date) (DAY=$DAY HOUR=$HOUR)"
+          SHOULD=false
+          # Mon–Sat only
+          if [ "$DAY" -ge 1 ] && [ "$DAY" -le 6 ]; then
+            # Between 07 and 20 local (inclusive bounds check; run hours are 07..19)
+            if [ "$HOUR" -ge 7 ] && [ "$HOUR" -le 19 ]; then
+              # Every other hour starting at 07 (odd hours)
+              if [ $((10#$HOUR % 2)) -eq 1 ]; then
+                SHOULD=true
+              fi
+            fi
+          fi
+          echo "should_run=${SHOULD}" >> "$GITHUB_OUTPUT"
+          if [ "$SHOULD" != "true" ]; then
+            echo "Outside MT schedule window; subsequent steps will be skipped."
+          fi
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
+        if: ${{ steps.schedule_check.outputs.should_run == 'true' }}
 
       - name: Install Python dependencies
+        if: ${{ steps.schedule_check.outputs.should_run == 'true' }}
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Run scraper
+        if: ${{ steps.schedule_check.outputs.should_run == 'true' }}
         run: python src/script/toyota_scrapper.py
 
       - name: Commit CSV if changed
+        if: ${{ steps.schedule_check.outputs.should_run == 'true' }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -40,5 +67,5 @@ jobs:
           fi
 
       - name: Trigger Vercel deploy hook (optional)
-        if: ${{ secrets.VERCEL_DEPLOY_HOOK_URL != '' }}
+        if: ${{ steps.schedule_check.outputs.should_run == 'true' && secrets.VERCEL_DEPLOY_HOOK_URL != '' }}
         run: curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK_URL }}"
